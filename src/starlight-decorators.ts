@@ -62,20 +62,14 @@ interface NonAbstractTask extends Task {
 	run(data: TaskData): Promise<void>;
 }
 
-const kScheduled = Symbol('ScheduledTask');
-
 export function EnsureTask(time: string | number | Date, options?: ScheduledTaskOptions): ClassDecorator {
 	return createClassDecorator(
 		(target: Constructor<NonAbstractTask>) =>
 			class extends target {
-				private get [kScheduled]() {
-					return this.client.schedule.tasks.find((st) => st.taskName === this.name && st.task === this);
-				}
-
 				public async init(): Promise<void> {
 					await super.init();
 
-					const scheduled = this[kScheduled];
+					const scheduled = this.client.schedule.tasks.find((st) => st.taskName === this.name && st.task === this);
 					if (typeof scheduled === 'undefined') {
 						await this.client.schedule.create(this.name, time, options);
 					}

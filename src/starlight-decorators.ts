@@ -23,7 +23,7 @@
  */
 
 import type { Constructor } from '@klasa/core';
-import type { Command, CommandOptions, CommandStore, CustomUsageArgument } from 'klasa';
+import type { Command, CommandOptions, CommandStore, CustomUsageArgument, ScheduledTaskOptions, Task, TaskData } from 'klasa';
 import { createClassDecorator } from './utils';
 
 /**
@@ -53,6 +53,26 @@ export function CreateResolvers(resolvers: [string, CustomUsageArgument][]): Cla
 					super(store, directory, files, options);
 
 					for (const resolver of resolvers) this.createCustomResolver(...resolver);
+				}
+			}
+	);
+}
+
+interface NonAbstractTask extends Task {
+	run(data: TaskData): Promise<void>;
+}
+
+export function EnsureTask(time: string | number | Date, options?: ScheduledTaskOptions): ClassDecorator {
+	return createClassDecorator(
+		(target: Constructor<NonAbstractTask>) =>
+			class extends target {
+				public async init(): Promise<void> {
+					await super.init();
+
+					const scheduled = this.client.schedule.tasks.find((st) => st.taskName === this.name && st.task === this);
+					if (typeof scheduled === 'undefined') {
+						await this.client.schedule.create(this.name, time, options);
+					}
 				}
 			}
 	);

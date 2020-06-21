@@ -1,5 +1,5 @@
 import { Permissions, PermissionsResolvable, Piece, PieceOptions, Store, TextChannel } from '@klasa/core';
-import type { Constructor, KlasaMessage } from 'klasa';
+import type { Constructor, KlasaMessage, KlasaClient } from 'klasa';
 import { createClassDecorator, createFunctionInhibitor, Fallback } from './utils';
 
 /**
@@ -15,11 +15,12 @@ import { createClassDecorator, createFunctionInhibitor, Fallback } from './utils
  * @since 1.0.0
  * @param options The options to pass to the piece constructor
  */
-export function ApplyOptions<T extends PieceOptions>(options: T): ClassDecorator {
+export function ApplyOptions<T extends PieceOptions>(optionsOrFn: T | ((client: KlasaClient) => T)): ClassDecorator {
 	return createClassDecorator(
 		(target: Constructor<Piece>) =>
 			class extends target {
 				public constructor(store: Store<Piece>, file: string[], directory: string, baseOptions: PieceOptions = {}) {
+					const options = typeof optionsOrFn === 'function' ? optionsOrFn(store.client as KlasaClient) : optionsOrFn;
 					super(store, file, directory, { ...baseOptions, ...options });
 				}
 			}

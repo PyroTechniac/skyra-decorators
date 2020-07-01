@@ -1,21 +1,36 @@
 import { client, MockCommandStore } from '@mocks/MockInstances';
 import { ApplyOptions } from '@src/core-decorators';
-import { Command, CommandOptions } from 'klasa';
+import { Command, CommandOptions, KlasaClient } from 'klasa';
 
-test('ApplyOptions Decorator', () => {
-	@ApplyOptions<CommandOptions>({
-		name: 'test',
-		cooldown: 10
-	})
-	class TestPiece extends Command {
-		public getName() {
-			return this.name;
+describe('ApplyOptions', () => {
+	test('GIVEN options object THEN sets options', () => {
+		@ApplyOptions<CommandOptions>({
+			name: 'test',
+			cooldown: 10
+		})
+		class TestPiece extends Command {
+			public getName() {
+				return this.name;
+			}
 		}
-	}
 
-	const instance = new TestPiece(new MockCommandStore('name', client), __dirname, [__filename]);
+		const instance = new TestPiece(new MockCommandStore('name', client), __dirname, [__filename]);
 
-	expect(instance.name).toBe('test');
-	expect(instance.cooldown).toBe(10);
-	expect(instance.guarded).toBe(false);
+		expect(instance.name).toBe('test');
+		expect(instance.guarded).toBe(false);
+	});
+
+	test('GIVEN options function THEN resolves with function', () => {
+		@ApplyOptions<CommandOptions>((client: KlasaClient) => ({ name: client.options.language }))
+		class TestPiece extends Command {
+			public getName() {
+				return this.name;
+			}
+		}
+
+		const instance = new TestPiece(new MockCommandStore('name', client), __dirname, [__filename]);
+
+		expect(instance.name).toBe('en-gb');
+		expect(instance.guarded).toBe(false);
+	});
 });

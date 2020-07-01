@@ -23,7 +23,7 @@
  */
 
 import type { Constructor } from '@klasa/core';
-import type { Command, CommandOptions, CommandStore, CustomUsageArgument, Task, TaskData, ScheduledTaskOptions } from 'klasa';
+import type { Command, CommandOptions, CommandStore, CustomUsageArgument, ScheduledTaskOptions, Task, TaskData } from 'klasa';
 import { createClassDecorator } from './utils';
 
 /**
@@ -56,6 +56,22 @@ export function CreateResolvers(resolvers: [string, CustomUsageArgument][]): Cla
 				}
 			}
 	);
+}
+
+/**
+ * Applies a single custom resolver to a command through a decorator
+ *
+ * ```ts
+ *	CreateResolver('key', (arg, _possible, message, [action]) => {
+ *		if (action === 'show' || arg) return arg || '';
+ *		throw message.language.get('COMMAND_CONF_NOKEY');
+ *	})
+ * ```
+ * @param name Name of the custom argument resolver
+ * @param resolverFn Function describing how to resolve the argument
+ */
+export function CreateResolver(name: string, resolverFn: CustomUsageArgument): ClassDecorator {
+	return CreateResolvers([[name, resolverFn]]);
 }
 
 interface NonAbstractTask extends Task {

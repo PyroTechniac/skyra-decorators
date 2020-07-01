@@ -1,5 +1,5 @@
 import { Permissions, PermissionsResolvable, Piece, PieceOptions, Store, TextChannel } from '@klasa/core';
-import type { Constructor, KlasaMessage, KlasaClient } from 'klasa';
+import type { Constructor, KlasaClient, KlasaMessage } from 'klasa';
 import { createClassDecorator, createFunctionInhibitor, Fallback } from './utils';
 
 /**

@@ -23,7 +23,7 @@
  */
 
 import type { Constructor } from '@klasa/core';
-import type { Command, CustomUsageArgument, ScheduledTaskOptions, Task, TaskData } from 'klasa';
+import type { Command, CustomUsageArgument } from 'klasa';
 import { createClassDecorator, createProxy } from './utils';
 
 /**
@@ -72,26 +72,6 @@ export function CreateResolvers(resolvers: [string, CustomUsageArgument][]): Cla
  */
 export function CreateResolver(name: string, resolverFn: CustomUsageArgument): ClassDecorator {
 	return CreateResolvers([[name, resolverFn]]);
-}
-
-interface NonAbstractTask extends Task {
-	run(data: TaskData): Promise<void>;
-}
-
-export function EnsureTask(time: string | number | Date, options?: ScheduledTaskOptions): ClassDecorator {
-	return createClassDecorator(
-		(target: Constructor<NonAbstractTask>) =>
-			class extends target {
-				public async init(): Promise<void> {
-					await super.init();
-
-					const scheduled = this.client.schedule.tasks.find((st) => st.taskName === this.name && st.task === this);
-					if (typeof scheduled === 'undefined') {
-						await this.client.schedule.create(this.name, time, options);
-					}
-				}
-			}
-	);
 }
 
 // TODO: Add SetRoute decorator when KDH has been updated to support @klasa/core and klasa >= 0.6.0

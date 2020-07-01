@@ -23,8 +23,8 @@
  */
 
 import type { Constructor } from '@klasa/core';
-import type { Command, CommandOptions, CommandStore, CustomUsageArgument, ScheduledTaskOptions, Task, TaskData } from 'klasa';
-import { createClassDecorator } from './utils';
+import type { Command, CustomUsageArgument, ScheduledTaskOptions, Task, TaskData } from 'klasa';
+import { createClassDecorator, createProxy } from './utils';
 
 /**
  * Applies a set of custom resolvers to a command through a decorator
@@ -48,13 +48,13 @@ import { createClassDecorator } from './utils';
 export function CreateResolvers(resolvers: [string, CustomUsageArgument][]): ClassDecorator {
 	return createClassDecorator(
 		(target: Constructor<Command>) =>
-			class extends target {
-				public constructor(store: CommandStore, directory: string, files: readonly string[], options: CommandOptions) {
-					super(store, directory, files, options);
-
-					for (const resolver of resolvers) this.createCustomResolver(...resolver);
+			createProxy(target, {
+				construct: (ctor, [store, directory, files, options]): Command => {
+					const command = new ctor(store, directory, files, options);
+					for (const resolver of resolvers) command.createCustomResolver(...resolver);
+					return command;
 				}
-			}
+			})
 	);
 }
 

@@ -20,5 +20,5 @@ describe('ApplyOptions', () => {
 		expect(instance.cooldowns.time).toBe(10);
 		expect(instance.guarded).toBe(false);
 		expect(Object.getOwnPropertyDescriptor(instance.constructor.prototype, 'getName')).toBeDefined();
-	})
-})
+	});
+});

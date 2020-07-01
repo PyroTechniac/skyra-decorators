@@ -46,15 +46,14 @@ import { createClassDecorator, createProxy } from './utils';
  * @param resolvers Array of custom resolvers to apply to a command
  */
 export function CreateResolvers(resolvers: [string, CustomUsageArgument][]): ClassDecorator {
-	return createClassDecorator(
-		(target: Constructor<Command>) =>
-			createProxy(target, {
-				construct: (ctor, [store, directory, files, options]): Command => {
-					const command = new ctor(store, directory, files, options);
-					for (const resolver of resolvers) command.createCustomResolver(...resolver);
-					return command;
-				}
-			})
+	return createClassDecorator((target: Constructor<Command>) =>
+		createProxy(target, {
+			construct: (ctor, [store, directory, files, options]): Command => {
+				const command = new ctor(store, directory, files, options);
+				for (const resolver of resolvers) command.createCustomResolver(...resolver);
+				return command;
+			}
+		})
 	);
 }
 

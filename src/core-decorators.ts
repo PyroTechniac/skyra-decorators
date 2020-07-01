@@ -1,6 +1,6 @@
 import { Permissions, PermissionsResolvable, Piece, PieceOptions, TextChannel } from '@klasa/core';
 import type { Constructor, KlasaClient, KlasaMessage } from 'klasa';
-import { createClassDecorator, createFunctionInhibitor, Fallback, createProxy } from './utils';
+import { createClassDecorator, createFunctionInhibitor, createProxy, Fallback } from './utils';
 
 /**
  * Decorator function that applies given options to any Klasa piece
@@ -16,17 +16,14 @@ import { createClassDecorator, createFunctionInhibitor, Fallback, createProxy } 
  * @param options The options to pass to the piece constructor
  */
 export function ApplyOptions<T extends PieceOptions>(optionsOrFn: T | ((client: KlasaClient) => T)): ClassDecorator {
-	return createClassDecorator(
-		(target: Constructor<Piece>) =>
-			createProxy(target, {
-				construct: (ctor, [store, file, directory, baseOptions = {}]) => new ctor(store, file, directory, {
+	return createClassDecorator((target: Constructor<Piece>) =>
+		createProxy(target, {
+			construct: (ctor, [store, file, directory, baseOptions = {}]) =>
+				new ctor(store, file, directory, {
 					...baseOptions,
-					...(typeof optionsOrFn === 'function'
-						? optionsOrFn(store.client)
-						: optionsOrFn
-					)
+					...(typeof optionsOrFn === 'function' ? optionsOrFn(store.client) : optionsOrFn)
 				})
-			})
+		})
 	);
 }
 
